@@ -67,7 +67,12 @@ uint8_t SdSpiAltDriver::receive() {
  * \return Zero for no error or nonzero error code.
  */
 uint8_t SdSpiAltDriver::receive(uint8_t* buf, size_t n) {
-  // Works without 32-bit alignment of buf.
+  // ESP8266 SPI needs 32-bit aligned even for receive, handle misaglined start
+  while ((reinterpret_cast<uintptr_t>(buf) & 0X3) && n) {
+    *buf++ = SPI.transfer(0xff);
+    n--;
+  }
+  // Buff now 32-bit aligned, can do multibyte now
   SPI.transferBytes(0, buf, n);
   return 0;
 }
