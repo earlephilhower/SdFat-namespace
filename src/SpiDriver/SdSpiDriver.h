@@ -70,6 +70,11 @@ class SdSpiLibDriver {
     pinMode(csPin, OUTPUT);
     m_spi->begin();
   }
+    void begin(void (*cs_func)(bool cs_state)) {
+	    m_cs_func = cs_func;
+		m_cs_func(false);
+		m_spi->begin();
+    }
   /** Receive a byte.
    *
    * \return The byte.
@@ -126,6 +131,12 @@ class SdSpiLibDriver {
     pinMode(csPin, OUTPUT);
     SDCARD_SPI.begin();
   }
+  void begin(void (*cs_func)(bool cs_state)) {
+	  m_cs_func = cs_func;
+	  m_cs_func(false);
+	  SDCARD_SPI.begin();
+  }
+  
   /** Receive a byte.
    *
    * \return The byte.
@@ -166,7 +177,8 @@ class SdSpiLibDriver {
 #endif  // IMPLEMENT_SPI_PORT_SELECTION
   /** Set CS low. */
   void select() {
-    digitalWrite(m_csPin, LOW);
+    if (m_cs_func) m_cs_func(true);
+    else digitalWrite(m_csPin, LOW);
   }
   /** Save SPISettings.
    *
@@ -177,7 +189,8 @@ class SdSpiLibDriver {
   }
   /** Set CS high. */
   void unselect() {
-    digitalWrite(m_csPin, HIGH);
+    if (m_cs_func) m_cs_func(false);
+	else digitalWrite(m_csPin, HIGH);
   }
 #if IMPLEMENT_SPI_PORT_SELECTION || defined(DOXYGEN)
   /** Set SPI port.
@@ -193,6 +206,7 @@ class SdSpiLibDriver {
 #endif  // IMPLEMENT_SPI_PORT_SELECTION
   SPISettings m_spiSettings;
   uint8_t m_csPin;
+  void (*m_cs_func)(bool cs_state);
 };
 //------------------------------------------------------------------------------
 /**
@@ -214,6 +228,13 @@ class SdSpiAltDriver {
    * \param[in] csPin SD card chip select pin.
    */
   void begin(uint8_t csPin);
+  void begin(void (*cs_func)(bool cs_state))
+  {
+	  m_cs_func = cs_func;
+	  m_cs_func(false);
+	  SPI.begin();
+  }
+  
   /** Receive a byte.
    *
    * \return The byte.
@@ -240,7 +261,8 @@ class SdSpiAltDriver {
   void send(const uint8_t* buf, size_t n);
   /** Set CS low. */
   void select() {
-     digitalWrite(m_csPin, LOW);
+	 if(m_cs_func) m_cs_func(true);
+	 else digitalWrite(m_csPin, LOW);
   }
   /** Save SPISettings.
    *
@@ -251,7 +273,8 @@ class SdSpiAltDriver {
   }
   /** Set CS high. */
   void unselect() {
-    digitalWrite(m_csPin, HIGH);
+	if(m_cs_func) m_cs_func(false);
+	else digitalWrite(m_csPin, HIGH);
   }
 #if IMPLEMENT_SPI_PORT_SELECTION || defined(DOXYGEN)
   /** Set SPI port number.
@@ -267,6 +290,7 @@ class SdSpiAltDriver {
 #endif  // IMPLEMENT_SPI_PORT_SELECTION
   SPISettings m_spiSettings;
   uint8_t m_csPin;
+  void (*m_cs_func)(bool cs_state);
 };
 
 }; // namespace sdfat
@@ -302,6 +326,12 @@ class SdSpiSoftDriver : public SdSpiBaseDriver {
     digitalWrite(m_csPin, HIGH);
     m_spi.begin();
   }
+  
+    void begin(void (*cs_func)(bool cs_state)) {
+	    m_cs_func = cs_func;
+		m_cs_func(false);
+	    m_spi.begin();
+    }
   /** Receive a byte.
    *
    * \return The byte.
@@ -341,7 +371,8 @@ class SdSpiSoftDriver : public SdSpiBaseDriver {
   }
   /** Set CS low. */
   void select() {
-     digitalWrite(m_csPin, LOW);
+     if(m_cs_func) m_cs_func(true);
+     else digitalWrite(m_csPin, LOW);
   }
   /** Save SPISettings.
    *
@@ -352,12 +383,14 @@ class SdSpiSoftDriver : public SdSpiBaseDriver {
   }
   /** Set CS high. */
   void unselect() {
-    digitalWrite(m_csPin, HIGH);
+    if(m_cs_func) m_cs_func(false);
+    else digitalWrite(m_csPin, HIGH);
   }
 
  private:
   uint8_t m_csPin;
   SoftSPI<MisoPin, MosiPin, SckPin, 0> m_spi;
+  void (*m_cs_func)(bool cs_state);
 };
 
 }; // namespace sdfat

@@ -61,6 +61,7 @@ class SdSpiCard {
    * \return true for success else false.
    */
   bool begin(SdSpiDriver* spi, uint8_t csPin, SPISettings spiSettings);
+  bool begin(SdSpiDriver* spi, void (*cs_func)(bool cs_state), SPISettings spiSettings);
   /**
    * Determine the size of an SD flash memory card.
    *
@@ -313,6 +314,7 @@ class SdSpiCard {
   bool    m_spiActive;
   uint8_t m_status;
   uint8_t m_type;
+  void (*m_cs_func)(bool cs_state);
 #else
  public:
   SdSpiCard() : m_errorCode(SD_CARD_ERROR_INIT_NOT_CALLED), m_type(0) {
