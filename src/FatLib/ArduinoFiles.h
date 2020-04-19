@@ -39,7 +39,7 @@ namespace sdfat {
 /** Arduino SD.h style flag for open for read. */
 #define FILE_READ O_RDONLY
 /** Arduino SD.h style flag for open at EOF for read/write with create. */
-#define FILE_WRITE (O_RDWR | O_CREAT | O_AT_END)
+#define FILE_WRITE (sdfat::O_RDWR | sdfat::O_CREAT | sdfat::O_AT_END)
 //==============================================================================
 /**
  * \class PrintFile
