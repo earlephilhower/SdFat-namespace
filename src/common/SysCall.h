@@ -94,8 +94,8 @@ inline void SysCall::yield() {
   // Use the external Arduino yield() function.
 #if defined(ESP8266)
   // SdFat uses `SysCall::yield()` from within OS callbacks, a no-no.
-  // Use delay(0) instead, which is safe under all circumstances
-  ::delay(0);
+  // Use esp_yield() instead, which is safe under all circumstances
+  ::esp_yield();
 #else
   ::yield();
 #endif
